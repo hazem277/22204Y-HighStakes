@@ -11,23 +11,18 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
+#include "definitions.h"
 
 using namespace vex;
 
 // A global instance of competition
 competition Competition;
 
-// define your global instances of motors and other devices here
+//flags
+bool clamped = false;
 
-/*---------------------------------------------------------------------------*/
-/*                          Pre-Autonomous Functions                         */
-/*                                                                           */
-/*  You may want to perform some actions before the competition starts.      */
-/*  Do them in the following function.  You must return from this function   */
-/*  or the autonomous and usercontrol tasks will not be started.  This       */
-/*  function is only called once after the V5 has been powered on and        */
-/*  not every time that the robot is disabled.                               */
-/*---------------------------------------------------------------------------*/
+
+int intakeState = 0;
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -64,19 +59,40 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
-  // User control code here, inside the loop
-  while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
 
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
+  task RUNDRIVETRAIN = task(runDriveTrain);
+  
+  while (true) {
 
-    wait(20, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
+    // intake
+    if(Controller1.ButtonR1.pressing() && !intakeState == 1) {
+      intakeMotor.spin(fwd, 100, pct);
+      intakeState == 1;
+      waitUntil(!Controller1.ButtonR2.pressing());
+    }
+    else if(Controller1.ButtonR2.pressing() && !intakeState == -1) {
+      intakeMotor.spin(reverse, 100, pct);
+      intakeState = -1;
+      waitUntil(!Controller1.ButtonR2.pressing());
+    }
+    else if(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing() || Controller1.ButtonL1.pressing()) {
+      intakeMotor.stop(coast);
+      intakeState = 0;
+    }
+    
+    // clamp
+    if(Controller1.ButtonA.pressing() && !clamped) {
+      clamp.set(true);
+      clamped = true;
+      waitUntil(!Controller1.ButtonA.pressing());
+    }
+    else if(Controller1.ButtonA.pressing() && clamped){
+      clamp.set(false);
+      clamped = false;
+      waitUntil(!Controller1.ButtonA.pressing());
+    }
+
+    wait(20, msec);
   }
 }
 
