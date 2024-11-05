@@ -10,6 +10,7 @@ extern motor rightBackMotor;
 extern motor leftFrontMotor;
 extern motor leftBackMotor;
 extern digital_out clamp;
+extern inertial inertialSensor;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

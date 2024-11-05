@@ -78,6 +78,7 @@ void usercontrol(void) {
     else if(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing() || Controller1.ButtonL1.pressing()) {
       intakeMotor.stop(coast);
       intakeState = 0;
+      waitUntil(!(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing()));
     }
     
     // clamp
