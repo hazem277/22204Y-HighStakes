@@ -15,12 +15,15 @@ extern double correction;
 
 extern double intendedHeading;
 extern double wheelCircumference;
+extern double wheelbaseWidth;
 
 void driveStraight(double targetDistance /* in feet */, double speed /* percentage */);
 
 void rotateToHeading(int targetHeading, float speed);
 
-void turnTo(int turn, float speed);
+void pivotTurn(int turn, float speed);
+
+void arcTurn(float theta, float radius, float speed);
 
 int runDriveTrain();
 
