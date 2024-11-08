@@ -114,7 +114,7 @@ void rotateToHeading(int targetHeading, float speed) {
   task::sleep(50);
 }
 
-void turn(int turn, float speed) {
+void turnTo(int turn, float speed) {
   inertialSensor.resetRotation();
 
   intendedHeading += turn;
@@ -146,6 +146,19 @@ void turn(int turn, float speed) {
   rotateToHeading(intendedHeading, 50);
 
   task::sleep(20);
+}
+
+const char* directionTypeToString(vex::directionType direction) {
+  switch (direction) {
+    case vex::directionType::fwd:
+      return "forward";
+    
+    case vex::directionType::rev:
+      return "reverse";
+
+    default:
+      return "null";
+    }
 }
 
 int runDriveTrain() {

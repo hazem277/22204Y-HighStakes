@@ -12,6 +12,8 @@
 
 #include "vex.h"
 #include "definitions.h"
+#include <stdlib.h>
+#include <iostream>
 
 using namespace vex;
 
@@ -20,7 +22,7 @@ competition Competition;
 
 //flags
 bool clamped = false;
-
+bool armed = false;
 
 int intakeState = 0;
 
@@ -43,9 +45,7 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
+  driveStraight(2, 50);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -62,15 +62,19 @@ void usercontrol(void) {
 
   task RUNDRIVETRAIN = task(runDriveTrain);
   
+  std::cout << "clamp: " << clamp.value() << std::endl;
+  std::cout << "arm: " << arm.value() << std::endl;
+  std::cout << "intake direction: " << directionTypeToString(intakeMotor.direction()) << std::endl;
+
   while (true) {
 
     // intake
-    if(Controller1.ButtonR1.pressing() && !intakeState == 1) {
+    if(Controller1.ButtonR1.pressing() && !(intakeMotor.direction() == vex::directionType::rev)) {
       intakeMotor.spin(fwd, 100, pct);
       intakeState == 1;
       waitUntil(!Controller1.ButtonR2.pressing());
     }
-    else if(Controller1.ButtonR2.pressing() && !intakeState == -1) {
+    else if(Controller1.ButtonR2.pressing() && !(intakeMotor.direction() == vex::directionType::rev)) {
       intakeMotor.spin(reverse, 100, pct);
       intakeState = -1;
       waitUntil(!Controller1.ButtonR2.pressing());
@@ -82,18 +86,32 @@ void usercontrol(void) {
     }
     
     // clamp
-    if(Controller1.ButtonA.pressing() && !clamped) {
+    if(Controller1.ButtonA.pressing() && !clamp.value()) {
       clamp.set(true);
-      clamped = true;
       waitUntil(!Controller1.ButtonA.pressing());
     }
-    else if(Controller1.ButtonA.pressing() && clamped){
+    else if(Controller1.ButtonA.pressing() && clamp.value()){
       clamp.set(false);
-      clamped = false;
       waitUntil(!Controller1.ButtonA.pressing());
     }
 
+    // arm
+    if(Controller1.ButtonB.pressing() && !arm.value()) {
+      arm.set(true);
+      waitUntil(!Controller1.ButtonA.pressing());
+    }
+    else if(Controller1.ButtonB.pressing() && arm.value()){
+      arm.set(false);
+      waitUntil(!Controller1.ButtonB.pressing());
+    }
+
     wait(20, msec);
+    std::cout << "\033[3A"; // go up 3 lines
+    std::cout << "\rarm: " << arm.value() << std::endl;
+    std::cout << "\033[1B"; // go down one line
+    std::cout << "\rclamp: " << clamp.value() << std::endl;
+    std::cout << "\033[1B"; // go down one line
+    std::cout << "intake direction: " << directionTypeToString(intakeMotor.direction()) << std::endl;
   }
 }
 

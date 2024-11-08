@@ -18,10 +18,12 @@ extern double wheelCircumference;
 
 void driveStraight(double targetDistance /* in feet */, double speed /* percentage */);
 
-void rotateTo(int targetHeading, float speed);
+void rotateToHeading(int targetHeading, float speed);
 
 void turnTo(int turn, float speed);
 
 int runDriveTrain();
+
+const char* directionTypeToString(vex::directionType direction);
 
 #endif

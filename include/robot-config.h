@@ -10,6 +10,7 @@ extern motor rightBackMotor;
 extern motor leftFrontMotor;
 extern motor leftBackMotor;
 extern digital_out clamp;
+extern digital_out arm;
 extern inertial inertialSensor;
 
 /**
