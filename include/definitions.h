@@ -27,6 +27,4 @@ void arcTurn(float theta, float radius, float speed);
 
 int runDriveTrain();
 
-const char* directionTypeToString(vex::directionType direction);
-
 #endif

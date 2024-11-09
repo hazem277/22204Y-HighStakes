@@ -177,19 +177,6 @@ void arcTurn(float theta /*degrees*/, float radius /*inches*/, float speed /*pre
   task::sleep(50);
 }
 
-const char* directionTypeToString(vex::directionType direction) {
-  switch (direction) {
-    case vex::directionType::fwd:
-      return "forward";
-    
-    case vex::directionType::rev:
-      return "reverse";
-
-    default:
-      return "null";
-    }
-}
-
 int runDriveTrain() {
   int rightMotorSpeed = 0;
   int leftMotorSpeed = 0;

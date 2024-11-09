@@ -20,12 +20,6 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-//flags
-bool clamped = false;
-bool armed = false;
-
-int intakeState = 0;
-
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
@@ -64,24 +58,20 @@ void usercontrol(void) {
   
   std::cout << "clamp: " << clamp.value() << std::endl;
   std::cout << "arm: " << arm.value() << std::endl;
-  std::cout << "intake direction: " << directionTypeToString(intakeMotor.direction()) << std::endl;
 
   while (true) {
 
     // intake
-    if(Controller1.ButtonR1.pressing() && !(intakeMotor.direction() == vex::directionType::rev)) {
+    if(Controller1.ButtonR1.pressing() && intakeMotor.velocity(pct) <= 0) {
       intakeMotor.spin(fwd, 100, pct);
-      intakeState == 1;
-      waitUntil(!Controller1.ButtonR2.pressing());
+      waitUntil(!Controller1.ButtonR1.pressing());
     }
-    else if(Controller1.ButtonR2.pressing() && !(intakeMotor.direction() == vex::directionType::rev)) {
+    else if(Controller1.ButtonR2.pressing() && intakeMotor.velocity(pct) >= 0) {
       intakeMotor.spin(reverse, 100, pct);
-      intakeState = -1;
       waitUntil(!Controller1.ButtonR2.pressing());
     }
     else if(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing() || Controller1.ButtonL1.pressing()) {
       intakeMotor.stop(coast);
-      intakeState = 0;
       waitUntil(!(Controller1.ButtonR1.pressing() || Controller1.ButtonR2.pressing()));
     }
     
@@ -110,8 +100,6 @@ void usercontrol(void) {
     std::cout << "\rarm: " << arm.value() << std::endl;
     std::cout << "\033[1B"; // go down one line
     std::cout << "\rclamp: " << clamp.value() << std::endl;
-    std::cout << "\033[1B"; // go down one line
-    std::cout << "intake direction: " << directionTypeToString(intakeMotor.direction()) << std::endl;
   }
 }
 
