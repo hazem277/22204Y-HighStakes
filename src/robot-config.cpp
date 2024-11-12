@@ -16,7 +16,8 @@ motor leftFrontMotor = motor(PORT11, ratio18_1, true);
 motor leftBackMotor = motor(PORT9, ratio18_1, true);
 digital_out clamp = digital_out(Brain.ThreeWirePort.A);
 digital_out arm = digital_out(Brain.ThreeWirePort.B);
-inertial inertialSensor = inertial(PORT21);
+inertial inertialSensor = inertial(PORT1);
+// reciever is in port 12
 
 // VEXcode generated functions
 // define variable for remote controller enable/disable
