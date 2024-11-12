@@ -21,20 +21,14 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-enum AllianceColor {
-  RED,
-  BLUE
-};
-
 enum Side {
-  RIGHT,
-  LEFT
+  positive,
+  negative
 };
 
 bool skills = false;
 bool readAuton = true;
-AllianceColor allianceColor = BLUE;
-Side side = RIGHT;
+Side side = positive;
 
 uint8_t   myarray[2][1024];
 
@@ -63,10 +57,10 @@ void autonomous(void) {
     if(skills) {
 
     }
-    else if((allianceColor == RED && side == RIGHT) || (allianceColor == BLUE && side == LEFT)){
+    else if(side == positive){
 
     }
-    else if ((allianceColor == RED && side == LEFT) || (allianceColor == BLUE && side == RIGHT)) {
+    else if (side == negative) {
 
     }
   }
@@ -85,12 +79,12 @@ void autonomous(void) {
     // clamp.set(false);
     // driveStraight(-0.5, 25);
   }
-  else if((allianceColor == RED && side == RIGHT) || (allianceColor == BLUE && side == LEFT)){
+  else if(side == positive){
     driveStraight(-2, 50);
     clamp.set(true);
     intakeMotor.spin(fwd, 100, pct);
   }
-  else if((allianceColor == RED && side == LEFT) || (allianceColor == BLUE && side == RIGHT)  ) {
+  else if(side == negative) {
     driveStraight(-2, 50);
     clamp.set(true);
     intakeMotor.spin(fwd, 100, pct);
@@ -111,23 +105,30 @@ void usercontrol(void) {
 
   if(recordAuton) {
 
-    wait(1, sec);
     Controller1.rumble("-");
     wait(1, sec);
     Controller1.rumble("-");
     wait(1, sec);
     Controller1.rumble("-");
+    wait(1, sec);
+    Controller1.rumble("...");
 
     for(int i=0;i<1024;i++) {
       myarray[0][i] = i;
       myarray[1][i] = 255-i;
     }
 
+    Brain.Screen.printAt(20, 20, "SD Card Inserted?: %d", Brain.SDcard.isInserted());
+
     Brain.SDcard.savefile("test.bin", (uint8_t *)myarray, sizeof(myarray));
 
-    memset(myarray, 0, sizeof(myarray));
+    memset(myarray, 0, sizeof(myarray)); // clears arrays
 
     Brain.SDcard.loadfile("test.bin", (uint8_t *)myarray, sizeof(myarray));
+
+    Brain.Screen.printAt(20, 40,"%02X %02X %02X %02X", myarray[0][0], myarray[0][1], myarray[0][2],myarray[0][3]);
+    Brain.Screen.printAt(20, 60,"%02X %02X %02X %02X", myarray[1][0], myarray[1][1], myarray[1][2],myarray[1][3]);
+
   }
 
   task RUNDRIVETRAIN = task(runDriveTrain);
