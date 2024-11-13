@@ -17,7 +17,7 @@ extern double intendedHeading;
 extern double wheelCircumference;
 extern double wheelbaseWidth;
 
-int deadband;
+extern int deadband;
 
 void driveStraight(double targetDistance /* in feet */, double speed /* percentage */);
 
