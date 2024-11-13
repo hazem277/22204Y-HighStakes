@@ -30,9 +30,10 @@ bool skills = false;
 bool readAuton = true;
 Side side = positive;
 
-uint8_t   myarray[2][1024];
+uint8_t axisData[2][1024]; //  [1] = Axis 3 | [2] = Axis 1
 
 bool recordAuton = true; // set to false for normal driver control
+double autonTimer;
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -58,7 +59,7 @@ void autonomous(void) {
 
     }
     else if(side == positive){
-
+      Brain.SDcard.loadfile("controllerAxisValues.bin", (uint8_t *)axisData, sizeof(axisData));
     }
     else if (side == negative) {
 
@@ -104,6 +105,9 @@ void autonomous(void) {
 void usercontrol(void) {
 
   if(recordAuton) {
+    Brain.Screen.printAt(20, 20, "SD Card Inserted?: %d", Brain.SDcard.isInserted());
+    Brain.Screen.printAt(20, 40, "Save file exists?: %d", Brain.SDcard.exists("controllerAxisValues.bin"));
+    Brain.Screen.printAt(20, 60, "size of file: %d", Brain.SDcard.size("controllerAxisValues.bin"));
 
     Controller1.rumble("-");
     wait(1, sec);
@@ -113,22 +117,9 @@ void usercontrol(void) {
     wait(1, sec);
     Controller1.rumble("...");
 
-    for(int i=0;i<1024;i++) {
-      myarray[0][i] = i;
-      myarray[1][i] = 255-i;
-    }
+    autonTimer = Brain.timer(msec);
 
-    Brain.Screen.printAt(20, 20, "SD Card Inserted?: %d", Brain.SDcard.isInserted());
-
-    Brain.SDcard.savefile("test.bin", (uint8_t *)myarray, sizeof(myarray));
-
-    memset(myarray, 0, sizeof(myarray)); // clears arrays
-
-    Brain.SDcard.loadfile("test.bin", (uint8_t *)myarray, sizeof(myarray));
-
-    Brain.Screen.printAt(20, 40,"%02X %02X %02X %02X", myarray[0][0], myarray[0][1], myarray[0][2],myarray[0][3]);
-    Brain.Screen.printAt(20, 60,"%02X %02X %02X %02X", myarray[1][0], myarray[1][1], myarray[1][2],myarray[1][3]);
-
+    // memset(axisData, 0, sizeof(axisData)); // clears arrays
   }
 
   task RUNDRIVETRAIN = task(runDriveTrain);
@@ -165,12 +156,23 @@ void usercontrol(void) {
       waitUntil(!Controller1.ButtonB.pressing());
     }
 
+    if(recordAuton){
+      int i = 0;
+      axisData[0][i] = Controller1.Axis3.position();
+      axisData[1][i] = Controller1.Axis1.position();
+      i++;
+      if(autonTimer >= 1500) {
+        break;
+      }
+    }
+
     wait(20, msec);
     // std::cout << "\033[3A"; // go up 3 lines
     // std::cout << "\rarm: " << arm.value() << std::endl;
     // std::cout << "\033[1B"; // go down one line
     // std::cout << "\rclamp: " << clamp.value() << std::endl;
   }
+  Brain.SDcard.savefile("controllerAxisValues.bin", (uint8_t *)axisData, sizeof(axisData));
 }
 
 //

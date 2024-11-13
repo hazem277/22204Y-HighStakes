@@ -18,6 +18,8 @@ double intendedHeading = 0;
 double wheelCircumference = 3.25 * M_PI;
 double wheelbaseWidth = 15; // inches
 
+int deadband = 5;
+
 void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) {
 
   // convert from feet to degrees
@@ -187,7 +189,7 @@ int runDriveTrain() {
     rightMotorSpeed = Controller1.Axis3.position() - Controller1.Axis1.position();
 
     // right motors
-    if(abs(rightMotorSpeed) > 5) {
+    if(abs(rightMotorSpeed) > deadband) {
       rightFrontMotor.spin(fwd, rightMotorSpeed, pct);
       rightBackMotor.spin(fwd, rightMotorSpeed, pct);
       rightBraked = false;
@@ -199,7 +201,7 @@ int runDriveTrain() {
     }
 
     // left motors
-    if(abs(leftMotorSpeed) > 5) {
+    if(abs(leftMotorSpeed) > deadband) {
       leftFrontMotor.spin(fwd, leftMotorSpeed, pct);
       leftBackMotor.spin(fwd, leftMotorSpeed, pct);
       leftBraked = false;
