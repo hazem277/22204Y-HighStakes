@@ -185,8 +185,8 @@ int runDriveTrain() {
   bool rightBraked = false;
   bool leftBraked = false;
   while(true) {
-    leftMotorSpeed = Controller1.Axis3.position() + Controller1.Axis1.position();
     rightMotorSpeed = Controller1.Axis3.position() - Controller1.Axis1.position();
+    leftMotorSpeed = Controller1.Axis3.position() + Controller1.Axis1.position();
 
     // right motors
     if(abs(rightMotorSpeed) > deadband) {

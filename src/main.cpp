@@ -30,10 +30,11 @@ bool skills = false;
 bool readAuton = true;
 Side side = positive;
 
-uint8_t axisData[2][1024]; //  [1] = Axis 3 | [2] = Axis 1
+int8_t axisData[2][750]; //  [1] = Axis 3 | [2] = Axis 1
 
 bool recordAuton = true; // set to false for normal driver control
 double autonTimer;
+int i = 0;
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -59,7 +60,15 @@ void autonomous(void) {
 
     }
     else if(side == positive){
-      Brain.SDcard.loadfile("controllerAxisValues.bin", (uint8_t *)axisData, sizeof(axisData));
+      memset(axisData, 0, sizeof(axisData)); // clears arrays
+      Brain.SDcard.loadfile("positive.bin", (uint8_t *)axisData, sizeof(axisData));
+      for(int i = 0; i < 750; i++) {
+        rightFrontMotor.spin(fwd, axisData[0][i] - axisData[1][i], pct);
+        rightBackMotor.spin(fwd, axisData[0][i] - axisData[1][i], pct);
+        leftFrontMotor.spin(fwd, axisData[0][i] + axisData[1][i], pct);
+        leftBackMotor.spin(fwd, axisData[0][i] + axisData[1][i], pct);
+        wait(20,msec);
+      }
     }
     else if (side == negative) {
 
@@ -103,6 +112,7 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
+  std::cout << "user controll started" << std::endl;
 
   if(recordAuton) {
     Brain.Screen.printAt(20, 20, "SD Card Inserted?: %d", Brain.SDcard.isInserted());
@@ -119,7 +129,6 @@ void usercontrol(void) {
 
     autonTimer = Brain.timer(msec);
 
-    // memset(axisData, 0, sizeof(axisData)); // clears arrays
   }
 
   task RUNDRIVETRAIN = task(runDriveTrain);
@@ -156,12 +165,12 @@ void usercontrol(void) {
       waitUntil(!Controller1.ButtonB.pressing());
     }
 
-    if(recordAuton){
-      int i = 0;
+    if(recordAuton) {
       axisData[0][i] = Controller1.Axis3.position();
       axisData[1][i] = Controller1.Axis1.position();
+      std::cout << i << std::endl;
       i++;
-      if(autonTimer >= 1500) {
+      if(Brain.timer(msec) - autonTimer >= 15000 || i >= 749) {
         break;
       }
     }
@@ -172,7 +181,19 @@ void usercontrol(void) {
     // std::cout << "\033[1B"; // go down one line
     // std::cout << "\rclamp: " << clamp.value() << std::endl;
   }
-  Brain.SDcard.savefile("controllerAxisValues.bin", (uint8_t *)axisData, sizeof(axisData));
+  
+  RUNDRIVETRAIN.stop();
+  
+  std::cout << "recording ended" << std::endl;
+  
+  Brain.SDcard.savefile("positive.bin", (uint8_t *)axisData, sizeof(axisData));
+  
+  Brain.Screen.printAt(20, 80, "Auton Timer: %d", Brain.SDcard.size("controllerAxisValues.bin"));
+  
+  rightFrontMotor.stop(brake);
+  rightBackMotor.stop(brake);
+  leftFrontMotor.stop(brake);
+  leftBackMotor.stop(brake);
 }
 
 //
