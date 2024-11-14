@@ -21,20 +21,25 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-enum Side {
-  positive,
-  negative
-};
+/*auton settings_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
+enum Side { /*                                                     */
+  positive, /*                                                     */
+  negative  /*                                                     */
+};          /*                                                     */
+/*                                                                 */
+bool readAuton = true; /* first priority                           */
+bool skills = false;   /* second priority                          */
+Side side = positive;  /* last priority                            */
+/*                                                                 */
+/*arrays for storing recorded data                                 */
+int8_t  axisData[2][750] = {0}; /*  [1] = Axis 3 | [2] = Axis 1    */
+uint8_t clampDat[94] = {0};     /*  1 = clamp on | 0 = clamp off   */
+/*                                                                 */
+bool recordAuton = true; /* set to false for normal driver control */
+double autonTimer;       /* time auton started recording           */
+int autonIndex = 0;      /* index for recorded values              */
+/*_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
 
-bool skills = false;
-bool readAuton = true;
-Side side = positive;
-
-int8_t axisData[2][750]; //  [1] = Axis 3 | [2] = Axis 1
-
-bool recordAuton = true; // set to false for normal driver control
-double autonTimer;
-int i = 0;
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -166,11 +171,11 @@ void usercontrol(void) {
     }
 
     if(recordAuton) {
-      axisData[0][i] = Controller1.Axis3.position();
-      axisData[1][i] = Controller1.Axis1.position();
-      std::cout << i << std::endl;
-      i++;
-      if(Brain.timer(msec) - autonTimer >= 15000 || i >= 749) {
+      axisData[0][autonIndex] = Controller1.Axis3.position();
+      axisData[1][autonIndex] = Controller1.Axis1.position();
+      std::cout << autonIndex << std::endl;
+      autonIndex++;
+      if(Brain.timer(msec) - autonTimer >= 15000 || autonIndex >= 749) {
         break;
       }
     }

@@ -29,4 +29,8 @@ void arcTurn(float theta, float radius, float speed);
 
 int runDriveTrain();
 
+void setBit(uint8_t *array, int index, bool value);
+
+bool getbit(const uint8_t *array, int index);
+
 #endif
