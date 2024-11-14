@@ -226,7 +226,7 @@ void setBit(uint8_t *array, int index, bool value) {
   }
 }
 
-bool getbit(const uint8_t *array, int index) {
+bool getBit(const uint8_t *array, int index) {
   int byteIndex = index / 8;
   int bitIndex = index % 8;
   return (array[byteIndex] >> bitIndex) & 1;

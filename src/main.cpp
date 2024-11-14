@@ -22,19 +22,22 @@ using namespace vex;
 competition Competition;
 
 /*auton settings_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
-enum Side { /*                                                     */
-  positive, /*                                                     */
-  negative  /*                                                     */
-};          /*                                                     */
-/*                                                                 */
+enum Side { /* makes code more readable                            */
+  positive, /* used for auton positive corner setup                */
+  negative  /* used for auton negative corner setup                */
+};          /*-----------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* auton setup-----------------------------------------------------*/
 bool readAuton = true; /* first priority                           */
 bool skills = false;   /* second priority                          */
 Side side = positive;  /* last priority                            */
-/*                                                                 */
-/*arrays for storing recorded data                                 */
-int8_t  axisData[2][750] = {0}; /*  [1] = Axis 3 | [2] = Axis 1    */
-uint8_t clampDat[94] = {0};     /*  1 = clamp on | 0 = clamp off   */
-/*                                                                 */
+/*-----------------------------------------------------------------*/
+/*arrays for storing recorded data---------------------------------*/
+int8_t  axisData[2][750] = {0}; /* [1] = Axis 3 | [2] = Axis 1     */
+uint8_t clampData[94] = {0};    /* 94 bytes * 8 bits = 752 bits    */
+uint8_t armData[94] = {0};      /* 1 = on   | 0 = off              */
+/*-----------------------------------------------------------------*/
+/*driver settings for auton recording------------------------------*/
 bool recordAuton = true; /* set to false for normal driver control */
 double autonTimer;       /* time auton started recording           */
 int autonIndex = 0;      /* index for recorded values              */
@@ -67,11 +70,17 @@ void autonomous(void) {
     else if(side == positive){
       memset(axisData, 0, sizeof(axisData)); // clears arrays
       Brain.SDcard.loadfile("positive.bin", (uint8_t *)axisData, sizeof(axisData));
-      for(int i = 0; i < 750; i++) {
-        rightFrontMotor.spin(fwd, axisData[0][i] - axisData[1][i], pct);
-        rightBackMotor.spin(fwd, axisData[0][i] - axisData[1][i], pct);
-        leftFrontMotor.spin(fwd, axisData[0][i] + axisData[1][i], pct);
-        leftBackMotor.spin(fwd, axisData[0][i] + axisData[1][i], pct);
+      for(int index = 0; index < 750; index++) {
+        rightFrontMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
+        rightBackMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
+        leftFrontMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
+        leftBackMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
+        if(getBit(clampData, index) != clamp.value()) {
+          clamp.set(!clamp.value());
+        }
+        if(getBit(armData, index) != arm.value()) {
+          arm.set(!arm.value());
+        }
         wait(20,msec);
       }
     }
@@ -118,7 +127,6 @@ void autonomous(void) {
 
 void usercontrol(void) {
   std::cout << "user controll started" << std::endl;
-
   if(recordAuton) {
     Brain.Screen.printAt(20, 20, "SD Card Inserted?: %d", Brain.SDcard.isInserted());
     Brain.Screen.printAt(20, 40, "Save file exists?: %d", Brain.SDcard.exists("controllerAxisValues.bin"));
@@ -173,6 +181,8 @@ void usercontrol(void) {
     if(recordAuton) {
       axisData[0][autonIndex] = Controller1.Axis3.position();
       axisData[1][autonIndex] = Controller1.Axis1.position();
+      setBit(clampData, autonIndex, clamp.value());
+      setBit(armData, autonIndex, arm.value());
       std::cout << autonIndex << std::endl;
       autonIndex++;
       if(Brain.timer(msec) - autonTimer >= 15000 || autonIndex >= 749) {
@@ -181,6 +191,8 @@ void usercontrol(void) {
     }
 
     wait(20, msec);
+    std::cout << "is spinning: " << intakeMotor.isSpinning() << std::endl;
+    std::cout << "is spinning mode: " << intakeMotor.isSpinningMode() << std::endl;
     // std::cout << "\033[3A"; // go up 3 lines
     // std::cout << "\rarm: " << arm.value() << std::endl;
     // std::cout << "\033[1B"; // go down one line

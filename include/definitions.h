@@ -31,6 +31,6 @@ int runDriveTrain();
 
 void setBit(uint8_t *array, int index, bool value);
 
-bool getbit(const uint8_t *array, int index);
+bool getBit(const uint8_t *array, int index);
 
 #endif
