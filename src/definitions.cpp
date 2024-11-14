@@ -215,19 +215,19 @@ int runDriveTrain() {
   return 0;
 }
 
-void setBit(uint8_t *array, int index, bool value) {
-  int byteIndex = index / 8;
-  int bitIndex = index % 8;
-  if(value) {
-    array[byteIndex] |= (1 << bitIndex);
-  }
-  else {
-    array[byteIndex] &= ~(1 << bitIndex);
-  }
-}
+// void setBit(uint8_t *array, int index, bool value) {
+//   int byteIndex = index / 8;
+//   int bitIndex = index % 8;
+//   if(value) {
+//     array[byteIndex] |= (1 << bitIndex);
+//   }
+//   else {
+//     array[byteIndex] &= ~(1 << bitIndex);
+//   }
+// }
 
-bool getBit(const uint8_t *array, int index) {
-  int byteIndex = index / 8;
-  int bitIndex = index % 8;
-  return (array[byteIndex] >> bitIndex) & 1;
-}
+// bool getBit(const uint8_t *array, int index) {
+//   int byteIndex = index / 8;
+//   int bitIndex = index % 8;
+//   return (array[byteIndex] >> bitIndex) & 1;
+// }

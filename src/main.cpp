@@ -21,28 +21,44 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-/*auton settings_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
-enum Side { /* makes code more readable                            */
-  positive, /* used for auton positive corner setup                */
-  negative  /* used for auton negative corner setup                */
-};          /*-----------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-/* auton setup-----------------------------------------------------*/
-bool readAuton = true; /* first priority                           */
-bool skills = false;   /* second priority                          */
-Side side = positive;  /* last priority                            */
-/*-----------------------------------------------------------------*/
-/*arrays for storing recorded data---------------------------------*/
-int8_t  axisData[2][750] = {0}; /* [1] = Axis 3 | [2] = Axis 1     */
-uint8_t clampData[94] = {0};    /* 94 bytes * 8 bits = 752 bits    */
-uint8_t armData[94] = {0};      /* 1 = on   | 0 = off              */
-/*-----------------------------------------------------------------*/
-/*driver settings for auton recording------------------------------*/
-bool recordAuton = true; /* set to false for normal driver control */
-double autonTimer;       /* time auton started recording           */
-int autonIndex = 0;      /* index for recorded values              */
-/*_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
+/*auton settings_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
+enum Side { /* makes code more readable                              */
+  positive, /* used for auton positive corner setup                  */
+  negative  /* used for auton negative corner setup                  */
+};          /*-------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* auton setup-------------------------------------------------------*/
+bool recordAuton = false; /* set to false for normal driver control  */
+bool readAuton = true; /* first priority                             */
+bool skills = false;   /* second priority                            */
+Side side = negative;  /* last priority                              */
+double autonTimer;       /* time auton started recording             */
+int autonIndex = 0;      /* index for recorded values                */
+/*-------------------------------------------------------------------*/
+/*arrays for storing recorded data-----------------------------------*/
+int8_t  axisData[2][6000] = {0}; /* [1] = Axis 3 | [2] = Axis 1      */
+uint8_t clampData[750] = {0};    /* 750 bytes * 8 bits = 6000 bits   */
+uint8_t armData[750] = {0};      /* 1 = on | 0 = off                 */
+uint8_t intakeData[6000] = {0};  /* 1 = fwd | 0 = off | -1 = reverse */
+/*_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
 
+
+void setBit(uint8_t *array, int index, bool value) {
+  int byteIndex = index / 8;
+  int bitIndex = index % 8;
+  if(value) {
+    array[byteIndex] |= (1 << bitIndex);
+  }
+  else {
+    array[byteIndex] &= ~(1 << bitIndex);
+  }
+}
+
+bool getBit(const uint8_t *array, int index) {
+  int byteIndex = index / 8;
+  int bitIndex = index % 8;
+  return (array[byteIndex] >> bitIndex) & 1;
+}
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -64,28 +80,50 @@ void pre_auton(void) {
 
 void autonomous(void) {
   if(readAuton) {
+      // clear arrays
+      memset(axisData, 0, sizeof(axisData));
+      memset(clampData, 0, sizeof(clampData));
+      memset(armData, 0, sizeof(armData));
+      memset(intakeData, 0, sizeof(intakeData));
     if(skills) {
-
+      Brain.SDcard.loadfile("skillsAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
+      Brain.SDcard.loadfile("skillsClampData.bin", (uint8_t *)clampData, sizeof(clampData));
+      Brain.SDcard.loadfile("skillsArmData.bin", (uint8_t *)armData, sizeof(armData));
+      Brain.SDcard.savefile("skillsIntakeData.bin", (uint8_t *)intakeData, sizeof(intakeData));
     }
     else if(side == positive){
-      memset(axisData, 0, sizeof(axisData)); // clears arrays
-      Brain.SDcard.loadfile("positive.bin", (uint8_t *)axisData, sizeof(axisData));
-      for(int index = 0; index < 750; index++) {
-        rightFrontMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
-        rightBackMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
-        leftFrontMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
-        leftBackMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
-        if(getBit(clampData, index) != clamp.value()) {
-          clamp.set(!clamp.value());
-        }
-        if(getBit(armData, index) != arm.value()) {
-          arm.set(!arm.value());
-        }
-        wait(20,msec);
-      }
+      Brain.SDcard.loadfile("positiveAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
+      Brain.SDcard.loadfile("positiveClampData.bin", (uint8_t *)clampData, sizeof(clampData));
+      Brain.SDcard.loadfile("positiveArmData.bin", (uint8_t *)armData, sizeof(armData));
+      Brain.SDcard.savefile("positiveIntakeData.bin", (uint8_t *)intakeData, sizeof(intakeData));
     }
     else if (side == negative) {
-
+      Brain.SDcard.loadfile("negativeAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
+      Brain.SDcard.loadfile("negativeClampData.bin", (uint8_t *)clampData, sizeof(clampData));
+      Brain.SDcard.loadfile("negativeArmData.bin", (uint8_t *)armData, sizeof(armData));
+      Brain.SDcard.savefile("negativeIntakeData.bin", (uint8_t *)intakeData, sizeof(intakeData));
+    }
+    for(int index = 0; index < 750; index++) {
+      rightFrontMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
+      rightBackMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
+      leftFrontMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
+      leftBackMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
+      if(getBit(clampData, index) != clamp.value()) {
+        clamp.set(!clamp.value());
+      }
+      if(getBit(armData, index) != arm.value()) {
+        arm.set(!arm.value());
+      }
+      if(intakeData[index] == 1) {
+        intakeMotor.spin(fwd, 100, pct);
+      }
+      else if(intakeData[index] == -1) {
+        intakeMotor.spin(reverse, 100, pct);
+      }
+      else if(intakeData[index] == 0) {
+        intakeMotor.stop(coast);
+      }
+      wait(20,msec);
     }
   }
   else if(skills) {
@@ -142,6 +180,8 @@ void usercontrol(void) {
 
     autonTimer = Brain.timer(msec);
 
+    std::cout << "autonTimer: " << autonTimer << std::endl;
+
   }
 
   task RUNDRIVETRAIN = task(runDriveTrain);
@@ -183,16 +223,23 @@ void usercontrol(void) {
       axisData[1][autonIndex] = Controller1.Axis1.position();
       setBit(clampData, autonIndex, clamp.value());
       setBit(armData, autonIndex, arm.value());
+      if(intakeMotor.velocity(pct) == 0) {
+        intakeData[autonIndex] = 0;
+      }
+      else if(intakeMotor.velocity(pct) > 0) {
+        intakeData[autonIndex] = 1;
+      }
+      else if(intakeMotor.velocity(pct) < 0) {
+        intakeData[autonIndex] = -1;
+      }
       std::cout << autonIndex << std::endl;
       autonIndex++;
-      if(Brain.timer(msec) - autonTimer >= 15000 || autonIndex >= 749) {
+      if((Brain.timer(msec) - autonTimer >= 15000 && !skills) || (autonIndex >= 1499 && !skills) || (Brain.timer(msec) - autonTimer >= 60000 && skills) || (autonIndex >= 5999 && skills)) {
         break;
       }
     }
 
-    wait(20, msec);
-    std::cout << "is spinning: " << intakeMotor.isSpinning() << std::endl;
-    std::cout << "is spinning mode: " << intakeMotor.isSpinningMode() << std::endl;
+    wait(10, msec);
     // std::cout << "\033[3A"; // go up 3 lines
     // std::cout << "\rarm: " << arm.value() << std::endl;
     // std::cout << "\033[1B"; // go down one line
@@ -202,8 +249,27 @@ void usercontrol(void) {
   RUNDRIVETRAIN.stop();
   
   std::cout << "recording ended" << std::endl;
-  
-  Brain.SDcard.savefile("positive.bin", (uint8_t *)axisData, sizeof(axisData));
+
+  if(recordAuton) {
+    if(skills) {
+      Brain.SDcard.savefile("skillsAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
+      Brain.SDcard.savefile("skillsClampData.bin", (uint8_t *)clampData, sizeof(clampData));
+      Brain.SDcard.savefile("skillsArmData.bin", (uint8_t *)armData, sizeof(armData));
+      Brain.SDcard.savefile("skillsIntakeData.bin", (uint8_t *)intakeData, sizeof(intakeData));
+    }
+    else if(side == positive) {
+      Brain.SDcard.savefile("positiveAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
+      Brain.SDcard.savefile("positiveClampData.bin", (uint8_t *)clampData, sizeof(clampData));
+      Brain.SDcard.savefile("positiveArmData.bin", (uint8_t *)armData, sizeof(armData));
+      Brain.SDcard.savefile("positiveIntakeData.bin", (uint8_t *)intakeData, sizeof(intakeData));
+    }
+    else if(side == negative) {
+      Brain.SDcard.savefile("negativeAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
+      Brain.SDcard.savefile("negativeClampData.bin", (uint8_t *)clampData, sizeof(clampData));
+      Brain.SDcard.savefile("negativeArmData.bin", (uint8_t *)armData, sizeof(armData));
+      Brain.SDcard.savefile("negativeIntakeData.bin", (uint8_t *)intakeData, sizeof(intakeData));
+    }
+  }
   
   Brain.Screen.printAt(20, 80, "Auton Timer: %d", Brain.SDcard.size("controllerAxisValues.bin"));
   
