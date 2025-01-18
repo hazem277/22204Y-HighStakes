@@ -185,7 +185,7 @@ int runDriveTrain() {
   int strafeMotorSpeed = 0;
   bool rightBraked = false;
   bool leftBraked = false;
-  bool strafeBreaked = false;
+  bool strafeBraked = false;
 
   while(true) {
     rightMotorSpeed = Controller1.Axis3.position() - Controller1.Axis1.position();
@@ -219,11 +219,11 @@ int runDriveTrain() {
     // strafe motor
     if(abs(strafeMotorSpeed) > deadband) {
       strafeMotor.spin(fwd, strafeMotorSpeed, pct);
-      strafeBreaked = false;
+      strafeBraked = false;
     }
-    else if(!leftBraked) {
+    else if(!strafeBraked) {
       strafeMotor.stop(brake);
-      strafeBreaked = true;
+      strafeBraked = true;
     }
 
   }

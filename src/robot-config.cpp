@@ -18,13 +18,8 @@ motor leftBackMotor     = motor(PORT20, ratio18_1, true);
 motor strafeMotor       = motor(PORT16, ratio18_1, true);
 motor stakeMotor        = motor(PORT1, ratio18_1, true);
 
-digital_out clamp       = digital_out(Brain.ThreeWirePort.A);
-digital_out arm         = digital_out(Brain.ThreeWirePort.B);
-digital_in recordAuton  = digital_in(Brain.ThreeWirePort.H);
-digital_in skills       = digital_in(Brain.ThreeWirePort.G);
-digital_in positive     = digital_in(Brain.ThreeWirePort.F);
-digital_in red          = digital_in(Brain.ThreeWirePort.E);
-digital_in readAuton    = digital_in(Brain.ThreeWirePort.D);
+digital_out clamp       = digital_out(Brain.ThreeWirePort.H);
+digital_out arm         = digital_out(Brain.ThreeWirePort.G);
 
 inertial inertialSensor = inertial(PORT15);
 // reciever is in port 12
