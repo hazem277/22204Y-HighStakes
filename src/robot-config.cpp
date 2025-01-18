@@ -15,7 +15,7 @@ motor rightFrontMotor   = motor(PORT14, ratio18_1, false);
 motor rightBackMotor    = motor(PORT13, ratio18_1, false);
 motor leftFrontMotor    = motor(PORT12, ratio18_1, true);
 motor leftBackMotor     = motor(PORT20, ratio18_1, true);
-motor strafeMotor       = motor(PORT15, ratio18_1, true);
+motor strafeMotor       = motor(PORT16, ratio18_1, true);
 motor stakeMotor        = motor(PORT1, ratio18_1, true);
 
 digital_out clamp       = digital_out(Brain.ThreeWirePort.A);
@@ -25,7 +25,8 @@ digital_in skills       = digital_in(Brain.ThreeWirePort.G);
 digital_in positive     = digital_in(Brain.ThreeWirePort.F);
 digital_in red          = digital_in(Brain.ThreeWirePort.E);
 digital_in readAuton    = digital_in(Brain.ThreeWirePort.D);
-inertial inertialSensor = inertial(PORT1);
+
+inertial inertialSensor = inertial(PORT15);
 // reciever is in port 12
 
 // VEXcode generated functions
