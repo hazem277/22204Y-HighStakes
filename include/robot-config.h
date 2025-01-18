@@ -9,13 +9,10 @@ extern motor rightFrontMotor;
 extern motor rightBackMotor;
 extern motor leftFrontMotor;
 extern motor leftBackMotor;
+extern motor strafeMotor;
+extern motor stakeMotor;
 extern digital_out clamp;
 extern digital_out arm;
-extern digital_in recordAuton;
-extern digital_in skills;
-extern digital_in positive;
-extern digital_in red;
-extern digital_in readAuton;
 extern inertial inertialSensor;
 
 /**

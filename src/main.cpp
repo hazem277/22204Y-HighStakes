@@ -27,10 +27,10 @@ enum Side {                                         /* makes code more readable 
   NEGATIVE };                                       /* used for auton negative corner setup    */
 /*---------------------------------------------------------------------------------------------*/
 /* auton setup---------------------------------------------------------------------------------*/
-bool RECORDAUTON = recordAuton.value();             /* set to false for normal driver control  */
-bool READAUTON = readAuton.value();                  /* first priority                          */
-bool SKILLS = skills.value();                       /* second priority                         */
-Side side = positive.value() ? POSITIVE : NEGATIVE; /* last priority                           */
+bool recordAuton = false;                           /* set to false for normal driver control  */
+bool readAuton = false;                             /* first priority                          */
+bool skills = false;                                /* second priority                         */
+Side side = POSITIVE;                               /* last priority                           */
 double autonTimer;                                  /* time auton started recording            */
 int autonIndex = 0;                                 /* index for recorded values               */
 /*---------------------------------------------------------------------------------------------*/
@@ -78,13 +78,13 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  if(READAUTON) {
+  if(readAuton) {
       // clear arrays
       memset(axisData, 0, sizeof(axisData));
       memset(clampData, 0, sizeof(clampData));
       memset(armData, 0, sizeof(armData));
       memset(intakeData, 0, sizeof(intakeData));
-    if(SKILLS) {
+    if(skills) {
       Brain.SDcard.loadfile("skillsAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
       Brain.SDcard.loadfile("skillsClampData.bin", (uint8_t *)clampData, sizeof(clampData));
       Brain.SDcard.loadfile("skillsArmData.bin", (uint8_t *)armData, sizeof(armData));
@@ -125,7 +125,7 @@ void autonomous(void) {
       wait(20,msec);
     }
   }
-  else if(SKILLS) {
+  else if(skills) {
     driveStraight(-0.5, 50);
     clamp.set(true);
     rotateToHeading(270, 50);
@@ -163,11 +163,6 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
-  std::cout << "user controll started" << std::endl;
-  std::cout << "record auton: " << RECORDAUTON << std::endl;
-  std::cout << "read auton: " << READAUTON << std::endl;
-  std::cout << "skills: " << SKILLS << std::endl;
-  std::cout << "positive: " << positive.value() << std::endl;
   
   if(recordAuton) {
     Brain.Screen.printAt(20, 20, "SD Card Inserted?: %d", Brain.SDcard.isInserted());
@@ -224,7 +219,22 @@ void usercontrol(void) {
       waitUntil(!Controller1.ButtonB.pressing());
     }
 
-    if(RECORDAUTON) {
+    // stake arm
+
+    if(Controller1.ButtonUp.pressing() && Controller1.ButtonDown.pressing()) {
+      intakeMotor.stop(hold);
+    }
+    else if(Controller1.ButtonUp.pressing()) {
+      intakeMotor.spin(fwd, 100, pct);
+    }
+    else if(Controller1.ButtonDown.pressing()) {
+      intakeMotor.spin(reverse, 100, pct);
+    }
+    else {
+      intakeMotor.stop(hold);
+    }
+
+    if(recordAuton) {
       axisData[0][autonIndex] = Controller1.Axis3.position();
       axisData[1][autonIndex] = Controller1.Axis1.position();
       setBit(clampData, autonIndex, clamp.value());
@@ -260,7 +270,7 @@ void usercontrol(void) {
   std::cout << "recording ended" << std::endl;
 
   if(recordAuton) {
-    if(SKILLS) {
+    if(skills) {
       Brain.SDcard.savefile("skillsAxisData.bin", (uint8_t *)axisData, sizeof(axisData));
       Brain.SDcard.savefile("skillsClampData.bin", (uint8_t *)clampData, sizeof(clampData));
       Brain.SDcard.savefile("skillsArmData.bin", (uint8_t *)armData, sizeof(armData));

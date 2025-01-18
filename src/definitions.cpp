@@ -182,11 +182,15 @@ void arcTurn(float theta /*degrees*/, float radius /*inches*/, float speed /*pre
 int runDriveTrain() {
   int rightMotorSpeed = 0;
   int leftMotorSpeed = 0;
+  int strafeMotorSpeed = 0;
   bool rightBraked = false;
   bool leftBraked = false;
+  bool strafeBreaked = false;
+
   while(true) {
     rightMotorSpeed = Controller1.Axis3.position() - Controller1.Axis1.position();
     leftMotorSpeed = Controller1.Axis3.position() + Controller1.Axis1.position();
+    strafeMotorSpeed = Controller1.Axis4.position();
 
     // right motors
     if(abs(rightMotorSpeed) > deadband) {
@@ -211,6 +215,17 @@ int runDriveTrain() {
       leftBackMotor.stop(brake);
       leftBraked = true;
     }
+
+    // strafe motor
+    if(abs(strafeMotorSpeed) > deadband) {
+      strafeMotor.spin(fwd, strafeMotorSpeed, pct);
+      strafeBreaked = false;
+    }
+    else if(!leftBraked) {
+      strafeMotor.stop(brake);
+      strafeBreaked = true;
+    }
+
   }
   return 0;
 }
