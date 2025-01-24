@@ -11,12 +11,16 @@ brain  Brain;
 controller Controller1  = controller(primary);
 
 motor intakeMotor       = motor(PORT11, ratio18_1, false);
+
 motor rightFrontMotor   = motor(PORT14, ratio18_1, false);
+motor rightMidleMotor   = motor(PORT16, ratio18_1, false);
 motor rightBackMotor    = motor(PORT13, ratio18_1, false);
 motor leftFrontMotor    = motor(PORT12, ratio18_1, true);
+motor leftMidleMotor    = motor(PORT17, ratio18_1, true);
 motor leftBackMotor     = motor(PORT20, ratio18_1, true);
-motor strafeMotor       = motor(PORT16, ratio18_1, true);
-motor stakeMotor        = motor(PORT1, ratio18_1, true);
+
+motor rightStakeMotor   = motor(PORT1, ratio18_1, false);
+motor leftStakeMotor    = motor(PORT1, ratio18_1, true);
 
 digital_out clamp       = digital_out(Brain.ThreeWirePort.H);
 digital_out arm         = digital_out(Brain.ThreeWirePort.G);

@@ -215,17 +215,6 @@ int runDriveTrain() {
       leftBackMotor.stop(brake);
       leftBraked = true;
     }
-
-    // strafe motor
-    if(abs(strafeMotorSpeed) > deadband) {
-      strafeMotor.spin(fwd, strafeMotorSpeed, pct);
-      strafeBraked = false;
-    }
-    else if(!strafeBraked) {
-      strafeMotor.stop(brake);
-      strafeBraked = true;
-    }
-
   }
   return 0;
 }

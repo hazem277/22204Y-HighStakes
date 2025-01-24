@@ -127,52 +127,9 @@ void autonomous(void) {
   }
   else if(skills) {
     driveStraight(-0.29, 75);
-    clamp.set(true);
-    rotateToHeading(270, 75);
-    intakeMotor.spin(fwd, 100, pct);
-    driveStraight(1.25, 15);
-    driveStraight(-1.2, 75);
-    strafeMotor.spin(fwd, 100, pct);
-    wait(0.75, sec);
-    strafeMotor.stop();
-    rotateToHeading(270, 50);
-    driveStraight(1, 25);
-    strafeMotor.spin(reverse, 100, pct);
-    wait(1, sec);
-    strafeMotor.stop();
-    rotateToHeading(90, 75);
-    strafeMotor.spin(reverse, 100, pct);
-    wait(1, sec);
-    strafeMotor.stop();
-    driveStraight(-0.25, 100);
-    clamp.set(false);
-    driveStraight(1, 100);
-    strafeMotor.spin(fwd, 100, pct);
-    wait(0.65, sec);
-    strafeMotor.stop();
-    rotateToHeading(270, 75);
-    driveStraight(-3, 75);
-    clamp.set(true);
-    strafeMotor.spin(fwd, 100, pct);
-    wait(1, sec);
-    strafeMotor.stop();
-    driveStraight(-3, 75);
-    clamp.set(false);
-    driveStraight(-0.5, 100);
-    //pivotTurn(90, 50);
-    // rotateToHeading(145, 50);
-    // clamp.set(false);
   }
   else if(side == POSITIVE){
     driveStraight(-1.75, 50);
-    clamp.set(true);
-    intakeMotor.spin(fwd, 100, pct);
-    wait(3, sec);
-    strafeMotor.spin(fwd, 100, pct);
-    wait(2, sec);
-    intakeMotor.stop();
-    wait(1, sec);
-    strafeMotor.stop();
   }
   else if(side == NEGATIVE) {
     driveStraight(-1.5, 50);
@@ -251,16 +208,20 @@ void usercontrol(void) {
     // stake arm
 
     if(Controller1.ButtonUp.pressing() && Controller1.ButtonDown.pressing()) {
-      stakeMotor.stop(hold);
+      rightStakeMotor.stop(hold);
+      leftStakeMotor.stop(hold);
     }
     else if(Controller1.ButtonUp.pressing()) {
-      stakeMotor.spin(fwd, 100, pct);
+      rightStakeMotor.spin(fwd, 100, pct);
+      leftStakeMotor.spin(fwd, 100, pct);
     }
     else if(Controller1.ButtonDown.pressing()) {
-      stakeMotor.spin(reverse, 100, pct);
+      rightStakeMotor.spin(reverse, 100, pct);
+      leftStakeMotor.spin(reverse, 100, pct);
     }
     else {
-      stakeMotor.stop(hold);
+      rightStakeMotor.stop(hold);
+      leftStakeMotor.stop(hold);
     }
 
     if(recordAuton) {
