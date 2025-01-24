@@ -3,9 +3,9 @@
 #include <math.h>
 
 // PID Constants
-double Kp = 0.5;  // Adjust based on tuning
+double Kp = 0.0;  // Adjust based on tuning
 double Ki = 0.0;  // Typically low for heading control
-double Kd = 0.2;  // Adjust based on tuning
+double Kd = 0.0;  // Adjust based on tuning
 
 // PID Variables
 double heading_setpoint;
@@ -15,7 +15,7 @@ double cumulative_error = 0;
 double correction = 0;
 
 double intendedHeading = 0;
-double wheelCircumference = 3.25 * M_PI;
+double wheelCircumference = 3.25 * M_PI / 12; // ft
 double wheelbaseWidth = 15; // inches
 
 int deadband = 5;

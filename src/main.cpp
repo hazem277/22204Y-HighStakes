@@ -29,7 +29,7 @@ enum Side {                                         /* makes code more readable 
 /* auton setup---------------------------------------------------------------------------------*/
 bool recordAuton = false;                           /* set to false for normal driver control  */
 bool readAuton = false;                             /* first priority                          */
-bool skills = false;                                /* second priority                         */
+bool skills = true;                                /* second priority                         */
 Side side = POSITIVE;                               /* last priority                           */
 double autonTimer;                                  /* time auton started recording            */
 int autonIndex = 0;                                 /* index for recorded values               */
@@ -126,27 +126,56 @@ void autonomous(void) {
     }
   }
   else if(skills) {
-    driveStraight(-0.5, 50);
+    driveStraight(-0.29, 75);
     clamp.set(true);
-    rotateToHeading(270, 50);
+    rotateToHeading(270, 75);
     intakeMotor.spin(fwd, 100, pct);
-    driveStraight(1.5, 20);
-    driveStraight(-1, 20);
-    wait(3, sec);
-    pivotTurn(90, 50);
-    intakeMotor.stop();
-    // driveStraight(0.5, 25);
+    driveStraight(1.25, 15);
+    driveStraight(-1.2, 75);
+    strafeMotor.spin(fwd, 100, pct);
+    wait(0.75, sec);
+    strafeMotor.stop();
+    rotateToHeading(270, 50);
+    driveStraight(1, 25);
+    strafeMotor.spin(reverse, 100, pct);
+    wait(1, sec);
+    strafeMotor.stop();
+    rotateToHeading(90, 75);
+    strafeMotor.spin(reverse, 100, pct);
+    wait(1, sec);
+    strafeMotor.stop();
+    driveStraight(-0.25, 100);
+    clamp.set(false);
+    driveStraight(1, 100);
+    strafeMotor.spin(fwd, 100, pct);
+    wait(0.65, sec);
+    strafeMotor.stop();
+    rotateToHeading(270, 75);
+    driveStraight(-3, 75);
+    clamp.set(true);
+    strafeMotor.spin(fwd, 100, pct);
+    wait(1, sec);
+    strafeMotor.stop();
+    driveStraight(-3, 75);
+    clamp.set(false);
+    driveStraight(-0.5, 100);
+    //pivotTurn(90, 50);
     // rotateToHeading(145, 50);
     // clamp.set(false);
-    // driveStraight(-0.5, 25);
   }
   else if(side == POSITIVE){
-    driveStraight(-2, 50);
+    driveStraight(-1.75, 50);
     clamp.set(true);
     intakeMotor.spin(fwd, 100, pct);
+    wait(3, sec);
+    strafeMotor.spin(fwd, 100, pct);
+    wait(2, sec);
+    intakeMotor.stop();
+    wait(1, sec);
+    strafeMotor.stop();
   }
-  else if(side == POSITIVE) {
-    driveStraight(-2, 50);
+  else if(side == NEGATIVE) {
+    driveStraight(-1.5, 50);
     clamp.set(true);
     intakeMotor.spin(fwd, 100, pct);
   }
@@ -222,16 +251,16 @@ void usercontrol(void) {
     // stake arm
 
     if(Controller1.ButtonUp.pressing() && Controller1.ButtonDown.pressing()) {
-      intakeMotor.stop(hold);
+      stakeMotor.stop(hold);
     }
     else if(Controller1.ButtonUp.pressing()) {
-      intakeMotor.spin(fwd, 100, pct);
+      stakeMotor.spin(fwd, 100, pct);
     }
     else if(Controller1.ButtonDown.pressing()) {
-      intakeMotor.spin(reverse, 100, pct);
+      stakeMotor.spin(reverse, 100, pct);
     }
     else {
-      intakeMotor.stop(hold);
+      stakeMotor.stop(hold);
     }
 
     if(recordAuton) {
