@@ -103,10 +103,8 @@ void autonomous(void) {
       Brain.SDcard.savefile("negativeIntakeData.bin", (uint8_t *)intakeData, sizeof(intakeData));
     }
     for(int index = 0; index < 750; index++) {
-      rightFrontMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
-      rightBackMotor.spin(fwd, axisData[0][index] - axisData[1][index], pct);
-      leftFrontMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
-      leftBackMotor.spin(fwd, axisData[0][index] + axisData[1][index], pct);
+      rightMotors.spin(fwd, axisData[0][index] - axisData[1][index], pct);
+      leftMotors.spin(fwd, axisData[0][index] + axisData[1][index], pct);
       if(getBit(clampData, index) != clamp.value()) {
         clamp.set(!clamp.value());
       }
@@ -282,10 +280,8 @@ void usercontrol(void) {
   
   Brain.Screen.printAt(20, 80, "Auton Timer: %d", Brain.SDcard.size("controllerAxisValues.bin"));
   
-  rightFrontMotor.stop(brake);
-  rightBackMotor.stop(brake);
-  leftFrontMotor.stop(brake);
-  leftBackMotor.stop(brake);
+  rightMotors.stop(brake);
+  leftMotors.stop(brake);
 }
 
 //

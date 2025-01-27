@@ -8,11 +8,14 @@ extern controller Controller1;
 extern motor intakeMotor;
 
 extern motor rightFrontMotor;
-extern motor rightMidleMotor;
+extern motor rightMiddleMotor;
 extern motor rightBackMotor;
 extern motor leftFrontMotor;
-extern motor leftMidleMotor;
+extern motor leftMiddleMotor;
 extern motor leftBackMotor;
+
+extern motor_group rightMotors;
+extern motor_group leftMotors;
 
 extern motor rightStakeMotor;
 extern motor leftStakeMotor;

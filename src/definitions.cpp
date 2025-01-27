@@ -31,10 +31,8 @@ void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) 
   int driveDirection = targetDistance > 0 ? 1 : -1;
 
   // Reset encoders
-  rightFrontMotor.resetPosition();
-  rightBackMotor.resetPosition();
-  leftFrontMotor.resetPosition();
-  leftBackMotor.resetPosition();
+  rightMotors.resetPosition();
+  leftMotors.resetPosition();
 
   while ((driveDirection == 1 && rightFrontMotor.position(deg) < targetDegrees) || 
         (driveDirection == -1 && rightFrontMotor.position(deg) > targetDegrees)) {
@@ -56,19 +54,15 @@ void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) 
     correction = (Kp * error) + (Ki * cumulative_error) + (Kd * derivative);
 
     // Drive motors with corrected speed
-    rightFrontMotor.spin(driveDirection == 1 ? fwd : reverse, speed - correction, pct);
-    rightBackMotor.spin(driveDirection == 1 ? fwd : reverse, speed - correction, pct);
-    leftFrontMotor.spin(driveDirection == 1 ? fwd : reverse, speed + correction, pct);
-    leftBackMotor.spin(driveDirection == 1 ? fwd : reverse, speed + correction, pct);
+    rightMotors.spin(driveDirection == 1 ? fwd : reverse, speed - correction, pct);
+    leftMotors.spin(driveDirection == 1 ? fwd : reverse, speed + correction, pct);
 
     previous_error = error;
   }
 
   // Stop the motors
-  rightFrontMotor.stop(brake);
-  rightBackMotor.stop(brake);
-  leftFrontMotor.stop(brake);
-  leftBackMotor.stop(brake);
+  rightMotors.stop(brake);
+  leftMotors.stop(brake);
 }
 
 void rotateToHeading(int targetHeading /*degrees*/, float speed /*percentage*/) {
@@ -99,19 +93,14 @@ void rotateToHeading(int targetHeading /*degrees*/, float speed /*percentage*/) 
     float adjustedSpeed = speed * pow(turnRatio, powerFactor);
 
     // Control the motors based on the direction of the turn
-    rightFrontMotor.spin(turnDirection == 1 ? reverse : fwd, adjustedSpeed, pct);
-    rightBackMotor.spin(turnDirection == 1 ? reverse : fwd, adjustedSpeed, pct);
-    leftFrontMotor.spin(turnDirection == 1 ? fwd : reverse, adjustedSpeed, pct);
-    leftBackMotor.spin(turnDirection == 1 ? fwd : reverse, adjustedSpeed, pct);
+    rightMotors.spin(turnDirection == 1 ? reverse : fwd, adjustedSpeed, pct);
+    leftMotors.spin(turnDirection == 1 ? fwd : reverse, adjustedSpeed, pct);
 
     task::sleep(20);
   }
 
-  rightFrontMotor.stop(brake);
-  rightBackMotor.stop(brake);
-  leftFrontMotor.stop(brake);
-  leftBackMotor.stop(brake);
-
+  rightMotors.stop(brake);
+  leftMotors.stop(brake);
 
   task::sleep(50);
 }
@@ -132,18 +121,14 @@ void pivotTurn(int theta /*degrees*/, float speed /*precentage*/) {
     float powerFactor = 0.5; // Adjust the power factor for desired speed decrease rate
     float adjustedSpeed = speed * pow(1 - turnRatio, powerFactor);
 
-    rightFrontMotor.spin(turnDirection == 1 ? reverse : fwd, adjustedSpeed, pct);
-    rightBackMotor.spin(turnDirection == 1 ? reverse : fwd, adjustedSpeed, pct);
-    leftFrontMotor.spin(turnDirection == 1 ? fwd : reverse, adjustedSpeed, pct);
-    leftBackMotor.spin(turnDirection == 1 ? fwd : reverse, adjustedSpeed, pct);
+    rightMotors.spin(turnDirection == 1 ? reverse : fwd, adjustedSpeed, pct);
+    leftMotors.spin(turnDirection == 1 ? fwd : reverse, adjustedSpeed, pct);
 
     task::sleep(10);
   }
 
-  rightFrontMotor.stop(brake);
-  rightBackMotor.stop(brake);
-  leftFrontMotor.stop(brake);
-  leftBackMotor.stop(brake);
+  rightMotors.stop(brake);
+  leftMotors.stop(brake);
 
   rotateToHeading(intendedHeading, 50);
 
@@ -163,18 +148,14 @@ void arcTurn(float theta /*degrees*/, float radius /*inches*/, float speed /*pre
   // Loop until the robot turns the desired angle (θ degrees)
   while ((turnDirection == 1 && inertialSensor.rotation(deg) < theta) || 
          (turnDirection == -1 && inertialSensor.rotation(deg) > -theta)) {
-    rightFrontMotor.spin(fwd, turnDirection == 1? innerSpeed : outerSpeed, pct);
-    rightBackMotor.spin(fwd, turnDirection == 1? innerSpeed : outerSpeed, pct);
-    leftFrontMotor.spin(fwd, turnDirection == 1? outerSpeed : innerSpeed, pct);
-    leftBackMotor.spin(fwd, turnDirection == 1? outerSpeed : innerSpeed, pct);
+    rightMotors.spin(fwd, turnDirection == 1? innerSpeed : outerSpeed, pct);
+    leftMotors.spin(fwd, turnDirection == 1? outerSpeed : innerSpeed, pct);
         
     task::sleep(10);
   }
 
-  rightFrontMotor.stop(hold);
-  rightBackMotor.stop(hold);
-  leftFrontMotor.stop(hold);
-  leftBackMotor.stop(hold);
+  rightMotors.stop(hold);
+  leftMotors.stop(hold);
     
   task::sleep(50);
 }
@@ -182,37 +163,30 @@ void arcTurn(float theta /*degrees*/, float radius /*inches*/, float speed /*pre
 int runDriveTrain() {
   int rightMotorSpeed = 0;
   int leftMotorSpeed = 0;
-  int strafeMotorSpeed = 0;
   bool rightBraked = false;
   bool leftBraked = false;
-  bool strafeBraked = false;
 
   while(true) {
     rightMotorSpeed = Controller1.Axis3.position() - Controller1.Axis1.position();
     leftMotorSpeed = Controller1.Axis3.position() + Controller1.Axis1.position();
-    strafeMotorSpeed = Controller1.Axis4.position();
 
     // right motors
     if(abs(rightMotorSpeed) > deadband) {
-      rightFrontMotor.spin(fwd, rightMotorSpeed, pct);
-      rightBackMotor.spin(fwd, rightMotorSpeed, pct);
+      rightMotors.spin(fwd, rightMotorSpeed, pct);
       rightBraked = false;
     }
     else if(!rightBraked) {
-      rightFrontMotor.stop(brake);
-      rightBackMotor.stop(brake);
+      rightMotors.stop(brake);
       rightBraked = true;
     }
 
     // left motors
     if(abs(leftMotorSpeed) > deadband) {
-      leftFrontMotor.spin(fwd, leftMotorSpeed, pct);
-      leftBackMotor.spin(fwd, leftMotorSpeed, pct);
+      leftMotors.spin(fwd, leftMotorSpeed, pct);
       leftBraked = false;
     }
     else if(!leftBraked) {
-      leftFrontMotor.stop(brake);
-      leftBackMotor.stop(brake);
+      leftMotors.stop(brake);
       leftBraked = true;
     }
   }
