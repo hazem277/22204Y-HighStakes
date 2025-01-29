@@ -29,7 +29,7 @@ enum Side {                                         /* makes code more readable 
 /* auton setup---------------------------------------------------------------------------------*/
 bool recordAuton = false;                           /* set to false for normal driver control  */
 bool readAuton = false;                             /* first priority                          */
-bool skills = true;                                /* second priority                         */
+bool skills = true;                                 /* second priority                         */
 Side side = POSITIVE;                               /* last priority                           */
 double autonTimer;                                  /* time auton started recording            */
 int autonIndex = 0;                                 /* index for recorded values               */
@@ -41,6 +41,7 @@ uint8_t armData[750] = {0};                         /* 1 = on | 0 = off         
 int8_t intakeData[6000] = {0};                      /* 1 = fwd | 0 = off | -1 = reverse        */
 /*_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
 
+bool testing = true;
 
 void setBit(uint8_t *array, int index, bool value) {
   int byteIndex = index / 8;
@@ -63,6 +64,9 @@ void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
 
+  inertialSensor.calibrate();
+  waitUntil(!inertialSensor.isCalibrating());
+
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
 }
@@ -78,6 +82,13 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
+  task PRINT_DIAGNOSTICS = task(printDiagnostics);
+
+  if(testing) {
+    inertialSensor.calibrate();
+    waitUntil(!inertialSensor.isCalibrating());
+  }
+
   if(readAuton) {
       // clear arrays
       memset(axisData, 0, sizeof(axisData));
@@ -124,7 +135,8 @@ void autonomous(void) {
     }
   }
   else if(skills) {
-    driveStraight(-0.29, 75);
+    arcTurn(90, 12, 15);
+    // driveStraight(3, 75);
   }
   else if(side == POSITIVE){
     driveStraight(-1.75, 50);
@@ -167,7 +179,7 @@ void usercontrol(void) {
 
   }
 
-  task RUNDRIVETRAIN = task(runDriveTrain);
+  task RUN_DRIVETRAIN = task(runDriveTrain);
   
   // std::cout << "\033[2k";
   // std::cout << "clamp: " << clamp.value() << std::endl;
@@ -243,9 +255,9 @@ void usercontrol(void) {
       autonIndex++;
     }
 
-    std::cout << "brain timer: " << Brain.timer(msec) - autonTimer << std::endl;
-    std::cout << "time stamp: " << timeStamp << std::endl;
-    std::cout << "brain timer - time stamp: " << (Brain.timer(msec) - autonTimer) - timeStamp << std::endl;
+    // std::cout << "brain timer: " << Brain.timer(msec) - autonTimer << std::endl;
+    // std::cout << "time stamp: " << timeStamp << std::endl;
+    // std::cout << "brain timer - time stamp: " << (Brain.timer(msec) - autonTimer) - timeStamp << std::endl;
     wait(20, msec);
     // std::cout << "\033[3A"; // go up 3 lines
     // std::cout << "\rarm: " << arm.value() << std::endl;
@@ -253,7 +265,7 @@ void usercontrol(void) {
     // std::cout << "\rclamp: " << clamp.value() << std::endl;
   }
   
-  RUNDRIVETRAIN.stop();
+  RUN_DRIVETRAIN.stop();
   
   std::cout << "recording ended" << std::endl;
 

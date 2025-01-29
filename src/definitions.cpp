@@ -1,9 +1,10 @@
 #include "definitions.h"
 #include "vex.h"
 #include <math.h>
+#include <iostream>
 
 // PID Constants
-double Kp = 0.0;  // Adjust based on tuning
+double Kp = 0.001;  // Adjust based on tuning
 double Ki = 0.0;  // Typically low for heading control
 double Kd = 0.0;  // Adjust based on tuning
 
@@ -16,7 +17,7 @@ double correction = 0;
 
 double intendedHeading = 0;
 double wheelCircumference = 3.25 * M_PI / 12; // ft
-double wheelbaseWidth = 15; // inches
+double wheelbaseWidth = 11; // inches
 
 int deadband = 5;
 
@@ -137,6 +138,8 @@ void pivotTurn(int theta /*degrees*/, float speed /*precentage*/) {
 
 void arcTurn(float theta /*degrees*/, float radius /*inches*/, float speed /*precent*/) {
   inertialSensor.resetRotation();
+
+  intendedHeading += theta;
     
   // Determine the direction of the turn
   int turnDirection = (theta > 0) ? 1 : -1;
@@ -154,8 +157,8 @@ void arcTurn(float theta /*degrees*/, float radius /*inches*/, float speed /*pre
     task::sleep(10);
   }
 
-  rightMotors.stop(hold);
-  leftMotors.stop(hold);
+  rightMotors.stop(brake);
+  leftMotors.stop(brake);
     
   task::sleep(50);
 }
@@ -189,6 +192,13 @@ int runDriveTrain() {
       leftMotors.stop(brake);
       leftBraked = true;
     }
+  }
+  return 0;
+}
+
+int printDiagnostics() {
+  while(true) {
+    std::cout << "heading:" << inertialSensor.heading(deg) << std::endl;
   }
   return 0;
 }

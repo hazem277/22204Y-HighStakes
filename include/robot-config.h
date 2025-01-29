@@ -19,6 +19,7 @@ extern motor_group leftMotors;
 
 extern motor rightStakeMotor;
 extern motor leftStakeMotor;
+extern motor_group stakeMotors;
 
 extern digital_out clamp;
 extern digital_out arm;

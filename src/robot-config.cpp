@@ -10,26 +10,27 @@ brain  Brain;
 // VEXcode device constructors
 controller Controller1  = controller(primary);
 
-motor intakeMotor       = motor(PORT14, ratio18_1, false);
+motor intakeMotor       = motor(PORT5, ratio18_1, true);
 
-motor rightFrontMotor   = motor(PORT13, ratio18_1, false);
-motor rightMiddleMotor   = motor(PORT12, ratio18_1, false);
-motor rightBackMotor    = motor(PORT11, ratio18_1, false);
+motor rightFrontMotor   = motor(PORT1, ratio18_1, false);
+motor rightMiddleMotor   = motor(PORT2, ratio18_1, false);
+motor rightBackMotor    = motor(PORT3, ratio18_1, false);
 
-motor leftFrontMotor    = motor(PORT18, ratio18_1, true);
-motor leftMiddleMotor    = motor(PORT19, ratio18_1, true);
-motor leftBackMotor     = motor(PORT20, ratio18_1, true);
+motor leftFrontMotor    = motor(PORT10, ratio18_1, true);
+motor leftMiddleMotor    = motor(PORT9, ratio18_1, true);
+motor leftBackMotor     = motor(PORT8, ratio18_1, true);
 
 motor_group rightMotors = motor_group(rightFrontMotor, rightMiddleMotor, rightBackMotor);
 motor_group leftMotors = motor_group(leftFrontMotor, leftMiddleMotor, leftBackMotor);
 
-motor rightStakeMotor   = motor(PORT1, ratio18_1, false);
-motor leftStakeMotor    = motor(PORT10, ratio18_1, true);
+motor rightStakeMotor   = motor(PORT4, ratio18_1, false);
+motor leftStakeMotor    = motor(PORT7, ratio18_1, true);
+motor_group stakeMotors = motor_group(rightStakeMotor, leftStakeMotor);
 
-digital_out clamp       = digital_out(Brain.ThreeWirePort.B);
-digital_out arm         = digital_out(Brain.ThreeWirePort.A);
+digital_out clamp       = digital_out(Brain.ThreeWirePort.A);
+digital_out arm         = digital_out(Brain.ThreeWirePort.B);
 
-inertial inertialSensor = inertial(PORT17);
+inertial inertialSensor = inertial(PORT6);
 // reciever is in port 12
 
 // VEXcode generated functions
