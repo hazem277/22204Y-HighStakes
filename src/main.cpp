@@ -29,7 +29,7 @@ enum Side {                                         /* makes code more readable 
 /* auton setup---------------------------------------------------------------------------------*/
 bool recordAuton = false;                           /* set to false for normal driver control  */
 bool readAuton = false;                             /* first priority                          */
-bool skills = true;                                 /* second priority                         */
+bool skills = false;                                 /* second priority                         */
 Side side = POSITIVE;                               /* last priority                           */
 double autonTimer;                                  /* time auton started recording            */
 int autonIndex = 0;                                 /* index for recorded values               */
@@ -42,6 +42,11 @@ int8_t intakeData[6000] = {0};                      /* 1 = fwd | 0 = off | -1 = 
 /*_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
 
 bool testing = true;
+
+bool stakeIsActive = false;
+
+double stakeLowerLimit = 22;
+double stakeUpperLimit = 100;
 
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
@@ -121,11 +126,24 @@ void autonomous(void) {
     }
   }
   else if(skills) {
-    arcTurn(90, 12, 15);
-    // driveStraight(3, 75);
+    driveStraight(-0.5, 20);
+    clamp.set(true);
+    rotateToHeading(270, 50);
+    intakeMotor.spin(fwd, 100, pct);
+    driveStraight(1.25, 20);
+    rotateToHeading(135, 20);
+    driveStraight(-0.5, 20);
+    clamp.set(false);
+    driveStraight(1, 50);
   }
   else if(side == POSITIVE){
-    driveStraight(-1.75, 50);
+    driveStraight(-1.5, 50);
+    clamp.set(true);
+    intakeMotor.spin(fwd, 100, pct);
+    rotateToHeading(90, 50);
+    driveStraight(1.5, 20);
+    rotateToHeading(180, 50);
+    driveStraight(0.5, 20);
   }
   else if(side == NEGATIVE) {
     driveStraight(-1.5, 50);
@@ -145,6 +163,7 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
+  stakeRotation.setPosition(0, deg);
   
   if(recordAuton) {
     Brain.Screen.printAt(20, 20, "SD Card Inserted?: %d", Brain.SDcard.isInserted());
@@ -196,27 +215,36 @@ void usercontrol(void) {
     }
 
     // arm
-    if(Controller1.ButtonB.pressing()) {
+    if(Controller1.ButtonY.pressing()) {
       arm.set(!arm.value());
-      waitUntil(!Controller1.ButtonB.pressing());
+      waitUntil(!Controller1.ButtonY.pressing());
     }
 
+std::cout << stakeRotation.angle(deg) << std::endl;
+
     // stake arm
-    if(Controller1.ButtonUp.pressing() && (stakeMotors.position(deg) < 30 || stakeMotors.position(deg) > 40) ) {
-      //stakeMotors.spinFor(fwd, 35, deg, 50, pct);
-      waitUntil(!Controller1.ButtonUp.pressing());
+    if(Controller1.ButtonB.pressing()) {
+      stakeIsActive = !stakeIsActive;
+      Controller1.Screen.clearLine();
+      stakeMotor.setVelocity(20, pct);
+      if(stakeIsActive){
+        stakeMotor.spinToPosition(80, deg);
+      }
+      else {
+        stakeMotor.spinToPosition(0, deg);
+      }
+      waitUntil(!Controller1.ButtonB.pressing());
     }
-    else if(Controller1.ButtonUp.pressing()) {
-      stakeMotors.spin(fwd, 50, pct);
-      waitUntil(!Controller1.ButtonUp.pressing());
-    }
-    else if(Controller1.ButtonDown.pressing()) {
-      rightStakeMotor.spin(reverse, 100, pct);
-      leftStakeMotor.spin(reverse, 100, pct);
-    }
-    else {
-      rightStakeMotor.stop(hold);
-      leftStakeMotor.stop(hold);
+    if(stakeIsActive) {
+      if(Controller1.ButtonUp.pressing() && stakeRotation.angle(deg) < stakeUpperLimit) {
+        stakeMotor.spin(fwd, 20, pct);
+      }
+      else if(Controller1.ButtonDown.pressing() && stakeRotation.angle(deg) > stakeLowerLimit) {
+        stakeMotor.spin(reverse, 20, pct);
+      }
+      else {
+        stakeMotor.stop(hold);
+      }
     }
 
     if(recordAuton) {

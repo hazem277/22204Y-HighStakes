@@ -4,7 +4,7 @@
 #include <iostream>
 
 // PID Constants
-double Kp = 0.001;  // Adjust based on tuning
+double Kp = 0.00;  // Adjust based on tuning
 double Ki = 0.0;  // Typically low for heading control
 double Kd = 0.0;  // Adjust based on tuning
 
@@ -15,6 +15,8 @@ double wheelbaseWidth = 11; // inches
 int deadband = 5;
 
 void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) {
+  // reset rotation
+  inertialSensor.resetRotation();
 
   // initialize variables
   double error = 0;
@@ -35,11 +37,7 @@ void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) 
   while ((driveDirection == 1 && rightFrontMotor.position(deg) < targetDegrees) || 
         (driveDirection == -1 && rightFrontMotor.position(deg) > targetDegrees)) {
     // Calculate error
-    error = intendedHeading - inertialSensor.heading();
-        
-    // Normalize error to -180 to 180 range (avoids wrap-around issues)
-    if (error > 180) error -= 360;
-    if (error < -180) error += 360;
+    error = inertialSensor.rotation();
 
     // Integral term (accumulating error)
     cumulative_error += error;
@@ -47,12 +45,12 @@ void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) 
     // Derivative term (change in error)
     derivative = error - previous_error;
 
-    // PID correction for heading
+    // PID correction
     correction = (Kp * error) + (Ki * cumulative_error) + (Kd * derivative);
 
     // Drive motors with corrected speed
-    rightMotors.spin(driveDirection == 1 ? fwd : reverse, speed - correction, pct);
-    leftMotors.spin(driveDirection == 1 ? fwd : reverse, speed + correction, pct);
+    rightMotors.spin(driveDirection == 1 ? fwd : reverse, speed + correction, pct);
+    leftMotors.spin(driveDirection == 1 ? fwd : reverse, speed - correction, pct);
 
     previous_error = error;
   }
