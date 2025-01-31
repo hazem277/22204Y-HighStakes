@@ -43,29 +43,14 @@ int8_t intakeData[6000] = {0};                      /* 1 = fwd | 0 = off | -1 = 
 
 bool testing = true;
 
-void setBit(uint8_t *array, int index, bool value) {
-  int byteIndex = index / 8;
-  int bitIndex = index % 8;
-  if(value) {
-    array[byteIndex] |= (1 << bitIndex);
-  }
-  else {
-    array[byteIndex] &= ~(1 << bitIndex);
-  }
-}
-
-bool getBit(const uint8_t *array, int index) {
-  int byteIndex = index / 8;
-  int bitIndex = index % 8;
-  return (array[byteIndex] >> bitIndex) & 1;
-}
-
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
 
   inertialSensor.calibrate();
   waitUntil(!inertialSensor.isCalibrating());
+  std::cout << "inertial sensor initialized" << std::endl;
+  Controller1.Screen.print("inertial sensor initialized");
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
@@ -87,6 +72,7 @@ void autonomous(void) {
   if(testing) {
     inertialSensor.calibrate();
     waitUntil(!inertialSensor.isCalibrating());
+    std::cout << "inertial sensor initialized" << std::endl;
   }
 
   if(readAuton) {
@@ -216,14 +202,13 @@ void usercontrol(void) {
     }
 
     // stake arm
-
-    if(Controller1.ButtonUp.pressing() && Controller1.ButtonDown.pressing()) {
-      rightStakeMotor.stop(hold);
-      leftStakeMotor.stop(hold);
+    if(Controller1.ButtonUp.pressing() && (stakeMotors.position(deg) < 30 || stakeMotors.position(deg) > 40) ) {
+      //stakeMotors.spinFor(fwd, 35, deg, 50, pct);
+      waitUntil(!Controller1.ButtonUp.pressing());
     }
     else if(Controller1.ButtonUp.pressing()) {
-      rightStakeMotor.spin(fwd, 100, pct);
-      leftStakeMotor.spin(fwd, 100, pct);
+      stakeMotors.spin(fwd, 50, pct);
+      waitUntil(!Controller1.ButtonUp.pressing());
     }
     else if(Controller1.ButtonDown.pressing()) {
       rightStakeMotor.spin(reverse, 100, pct);

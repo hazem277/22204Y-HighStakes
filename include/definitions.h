@@ -1,17 +1,12 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
+#include "stdint.h" // to use uint8_t type alias
+
 // PID Constants
 extern double Kp;
 extern double Ki;
 extern double Kd;
-
-// PID Variables
-extern double heading_setpoint;
-extern double error;
-extern double previous_error;
-extern double cumulative_error;
-extern double correction;
 
 extern double intendedHeading;
 extern double wheelCircumference;
@@ -31,8 +26,8 @@ int runDriveTrain();
 
 int printDiagnostics();
 
-// void setBit(uint8_t *array, int index, bool value);
+void setBit(uint8_t *array, int index, bool value);
 
-// bool getBit(const uint8_t *array, int index);
+bool getBit(const uint8_t *array, int index);
 
 #endif

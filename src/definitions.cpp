@@ -8,13 +8,6 @@ double Kp = 0.001;  // Adjust based on tuning
 double Ki = 0.0;  // Typically low for heading control
 double Kd = 0.0;  // Adjust based on tuning
 
-// PID Variables
-double heading_setpoint;
-double error = 0;
-double previous_error = 0;
-double cumulative_error = 0;
-double correction = 0;
-
 double intendedHeading = 0;
 double wheelCircumference = 3.25 * M_PI / 12; // ft
 double wheelbaseWidth = 11; // inches
@@ -23,11 +16,15 @@ int deadband = 5;
 
 void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) {
 
+  // initialize variables
+  double error = 0;
+  double previous_error = 0;
+  double cumulative_error = 0;
+  double derivative = 0;
+  double correction = 0;
+
   // convert from feet to degrees
   double targetDegrees = targetDistance * 360 / wheelCircumference;
-
-  // set initial heading
-  heading_setpoint = intendedHeading;
 
   int driveDirection = targetDistance > 0 ? 1 : -1;
 
@@ -38,8 +35,7 @@ void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) 
   while ((driveDirection == 1 && rightFrontMotor.position(deg) < targetDegrees) || 
         (driveDirection == -1 && rightFrontMotor.position(deg) > targetDegrees)) {
     // Calculate error
-    double current_heading = inertialSensor.heading();
-    error = heading_setpoint - current_heading;
+    error = intendedHeading - inertialSensor.heading();
         
     // Normalize error to -180 to 180 range (avoids wrap-around issues)
     if (error > 180) error -= 360;
@@ -49,7 +45,7 @@ void driveStraight(double targetDistance /*feet*/, double speed /*percentage*/) 
     cumulative_error += error;
 
     // Derivative term (change in error)
-    double derivative = error - previous_error;
+    derivative = error - previous_error;
 
     // PID correction for heading
     correction = (Kp * error) + (Ki * cumulative_error) + (Kd * derivative);
@@ -199,23 +195,25 @@ int runDriveTrain() {
 int printDiagnostics() {
   while(true) {
     std::cout << "heading:" << inertialSensor.heading(deg) << std::endl;
+    wait(50, msec);
+    std::cout << "\033[2\r";
   }
   return 0;
 }
 
-// void setBit(uint8_t *array, int index, bool value) {
-//   int byteIndex = index / 8;
-//   int bitIndex = index % 8;
-//   if(value) {
-//     array[byteIndex] |= (1 << bitIndex);
-//   }
-//   else {
-//     array[byteIndex] &= ~(1 << bitIndex);
-//   }
-// }
+void setBit(uint8_t *array, int index, bool value) {
+  int byteIndex = index / 8;
+  int bitIndex = index % 8;
+  if(value) {
+    array[byteIndex] |= (1 << bitIndex);
+  }
+  else {
+    array[byteIndex] &= ~(1 << bitIndex);
+  }
+}
 
-// bool getBit(const uint8_t *array, int index) {
-//   int byteIndex = index / 8;
-//   int bitIndex = index % 8;
-//   return (array[byteIndex] >> bitIndex) & 1;
-// }
+bool getBit(const uint8_t *array, int index) {
+  int byteIndex = index / 8;
+  int bitIndex = index % 8;
+  return (array[byteIndex] >> bitIndex) & 1;
+}
